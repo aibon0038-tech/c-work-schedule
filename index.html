@@ -847,7 +847,7 @@
 
     const seedSites = [
       {
-        id: crypto.randomUUID(),
+        id: makeId(),
         name: "青葉町 戸建て改修",
         address: "横浜市青葉区 / 午前搬入",
         start: toInputDate(addDays(today, -2)),
@@ -857,7 +857,7 @@
         tasks: "搬入は午前中。近隣への声かけ済み。"
       },
       {
-        id: crypto.randomUUID(),
+        id: makeId(),
         name: "駅前テナント 原状回復",
         address: "川崎駅前 / 夜間作業あり",
         start: toInputDate(addDays(today, -5)),
@@ -867,7 +867,7 @@
         tasks: "夜間作業あり。管理会社へ事前連絡。"
       },
       {
-        id: crypto.randomUUID(),
+        id: makeId(),
         name: "南町 マンション共用部",
         address: "南町3丁目 / 管理人連絡済み",
         start: toInputDate(addDays(today, 1)),
@@ -928,6 +928,13 @@
       return next;
     }
 
+    function makeId() {
+      if (window.crypto?.randomUUID) {
+        return crypto.randomUUID();
+      }
+      return `site-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
     function toInputDate(date) {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -942,11 +949,21 @@
     }
 
     function save() {
-      localStorage.setItem(storageKey, JSON.stringify(sites));
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(sites));
+      } catch (error) {
+        alert("保存できませんでした。ブラウザの保存容量やプライベートモードを確認してください。");
+        throw error;
+      }
     }
 
     function saveRestDays() {
-      localStorage.setItem(restStorageKey, JSON.stringify(restDays));
+      try {
+        localStorage.setItem(restStorageKey, JSON.stringify(restDays));
+      } catch (error) {
+        alert("休み設定を保存できませんでした。ブラウザの保存容量やプライベートモードを確認してください。");
+        throw error;
+      }
     }
 
     function getVisibleSites() {
@@ -1345,7 +1362,7 @@
         return;
       }
       const payload = {
-        id: editingId || crypto.randomUUID(),
+        id: editingId || makeId(),
         name: els.nameInput.value.trim(),
         address: els.addressInput.value.trim(),
         start: els.startInput.value,
